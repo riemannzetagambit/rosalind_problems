@@ -2,7 +2,8 @@ Overview
 ========
 All problems from Rosalind are at a given URL `http://rosalind.info/problems/{PROBLEM_NAME}/`.
 The solution to each problem can be found at the corresponding python file `rosalind_{PROBLEM_NAME}.py`.
-For clarity, I do not include the associated `.txt` files of the same basename and only store them locally.
+For clarity, I do not include the associated `.txt` files of the same basename and only store them locally 
+(the data for each problem is randomized with each download anyway).
 
 In addition, there is a single module `rosalind_utils` that I include that has convenience functions and data that I use
 widely across problems-- e.g. the D/RNA alphabets, translation dictionaries, and some helper functions for testing.
