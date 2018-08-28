@@ -12,6 +12,7 @@ RC_DICT = {'A': 'T',
 
 def get_rosalind_data(filename):
     with open(filename, 'r') as f:
+        # dangerous for v. large files
         rosalind_data = f.readlines()
 
     return rosalind_data
