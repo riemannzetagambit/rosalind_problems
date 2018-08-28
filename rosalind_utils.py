@@ -3,6 +3,12 @@ from random import choice
 DNA_ALPHABET = 'ACGT'
 RNA_ALPHABET = 'ACGU'
 
+RC_DICT = {'A': 'T',
+           'T': 'A',
+           'G': 'C',
+           'C': 'G',
+           'N': 'N'}
+
 
 def get_rosalind_data(filename):
     with open(filename, 'r') as f:
