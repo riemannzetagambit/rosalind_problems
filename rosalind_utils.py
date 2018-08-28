@@ -19,3 +19,7 @@ def get_rosalind_data(filename):
 
 def random_genetic_sequence(length=150, alphabet=DNA_ALPHABET):
     return ''.join([choice(alphabet) for _ in range(length)])
+
+
+def get_reverse_complement(seq):
+    return ''.join([RC_DICT[x] for x in seq[::-1]])
