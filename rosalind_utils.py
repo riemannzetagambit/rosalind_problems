@@ -15,7 +15,7 @@ def get_rosalind_data(filename):
         # dangerous for v. large files
         rosalind_data = f.readlines()
 
-    return rosalind_data
+    return [rd.strip() for rd in rosalind_data]
 
 
 def random_genetic_sequence(length=150, alphabet=DNA_ALPHABET):
