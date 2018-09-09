@@ -20,7 +20,7 @@ def solve_problem(sequence_data):
     '''
     Assumes only two sequences in file
     '''
-    seq1, seq2 = sequence_data[0], sequence_data [1]
+    seq1, seq2 = sequence_data[0], sequence_data[1]
     hamming_distance = _get_hamming_distance(seq1, seq2)
 
     print(f'{hamming_distance}')
