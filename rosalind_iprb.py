@@ -1,4 +1,3 @@
-from collections import Counter
 import sys
 
 from rosalind_utils import get_rosalind_data
