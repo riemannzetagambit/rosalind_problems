@@ -1,7 +1,7 @@
 from collections import Counter
 import sys
 
-from rosalind_utils import get_rosalind_data, RC_DICT
+from rosalind_utils import get_rosalind_data, process_fasta_file, RC_DICT
 
 
 def _get_gc_content(dna_seq):
@@ -30,30 +30,8 @@ def solve_problem(sequence_data):
     [arbitrary number of lines of ATCG]
 
     '''
-    gc_content_dict = {}
-    read_id = None
-    lines = iter(sequence_data)
-    for line in lines:
-        read = ''
-        # iterate through lines to find identifier or set of lines corresponding to reads
-        while True:
-            if line is None:
-                # at end of file, so assign read GC content to last known read ID
-                gc_content_dict[read_id] = _get_gc_content(read)
-                break
-            elif line.startswith('>'):
-                if read_id is not None:
-                    # we already have a read ID from last read ID assignment and have been constructing read
-                    # so just assign GC content of constructed read to last read ID (that read was associated with)
-                    gc_content_dict[read_id] = _get_gc_content(read)
-                # if read_id is None, this is the first line, so just assign the read ID, 
-                # we'll get GC content in next pass
-                read_id = line.lstrip('>').strip()
-                break
-            else:
-                # construct the read by iterating through until we hit None (EOF) or next read ID ('>blahblah')
-                read += line.strip()
-                line = next(lines, None)
+    read_dict = process_fasta_file(sequence_data)
+    gc_content_dict = {read_id: _get_gc_content(read) for read_id, read in read_dict.items()}
 
     max_read_id = max(gc_content_dict, key=gc_content_dict.get)
     print(f'{max_read_id}\n{gc_content_dict[max_read_id]}')

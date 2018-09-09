@@ -84,6 +84,48 @@ def get_rosalind_data(filename):
     return [rd.strip() for rd in rosalind_data]
 
 
+def process_fasta_file(lines):
+    '''
+    Given a file in fasta format, return the read IDs and their associated reads (which can span over multiple lines) as
+    a dictionary
+
+    This method assumes that the read IDs in the fasta file are unique, that there are read IDs followed immediately but
+    an unknown number of lines of sequence data, and no other gaps (i.e. no blank lines). (this is the standard fasta
+    format)
+
+    :param lines: list
+        List of the lines in the file, usually retrieved via, e.g., open('path/to/file') as f: return f.readlines()
+
+    :return: dict
+        Dictionary with keys the read ID (assumed to be unique), values the associated reads (i.e. DNA sequences)
+    '''
+    read_dict = {}
+    read_id = None
+    lines = iter(lines)
+    for line in lines:
+        read = ''
+        # iterate through lines to find identifier or set of lines corresponding to reads
+        while True:
+            if line is None:
+                # at end of file, so assign read GC content to last known read ID
+                read_dict[read_id] = read
+                break
+            elif line.startswith('>'):
+                if read_id is not None:
+                    # we already have a read ID from last read ID assignment and have been constructing read
+                    # so just assign GC content of constructed read to last read ID (that read was associated with)
+                    read_dict[read_id] = read
+                # if read_id is None, this is the first line, so just assign the read ID, 
+                # we'll get GC content in next pass
+                read_id = line.lstrip('>').strip()
+                break
+            else:
+                # construct the read by iterating through until we hit None (EOF) or next read ID ('>blahblah')
+                read += line.strip()
+                line = next(lines, None)
+    return read_dict
+
+
 def random_genetic_sequence(length=150, alphabet=DNA_ALPHABET):
     return ''.join([choice(alphabet) for _ in range(length)])
 
