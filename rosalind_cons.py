@@ -6,7 +6,15 @@ from rosalind_utils import DNA_ALPHABET, get_rosalind_data, process_fasta_file
 
 def _get_consensus_profile_matrix(sequence_data):
     '''
+    Given sequence data in list form from a fasta file (see rosalind_utils.process_fasta_file for details), return two
+    dictionaries that profile the sequences in two ways:
+        The first gives the count of each type of base pair at each position in the sequences. The keys are integer
+            positions in the sequence and the values are dictionaries with keys DNA nucleotides and values the count of
+            that nucleotide at that position across all sequences
+        The second gives, for each DNA nucelotide, the counts of that nucleotide at each position along the sequences.
+            The keys are DNA nucelotides and the values are lists of integer counts at each position along the sequences
 
+    The sequences are all assumed to be the same length; an exception is raised if this is not the case
     '''
     position_counter_dict = {}
     profile_matrix_dict = {}
@@ -32,16 +40,20 @@ def _get_consensus_profile_matrix(sequence_data):
     return position_counter_dict, profile_matrix_dict
 
 
-
 def _get_consensus_sequence(sequence_data):
     '''
+    Given sequence data in list form from a fasta file (see rosalind_utils.process_fasta_file for details), return the
+    consensus sequence constructed from those sequences.
 
+    If multiple nucelotides have the same count at a given position, the first return from a max() call decides the
+    nucleotide called at that location
     '''
     profile_matrix_dict, _ = _get_consensus_profile_matrix(sequence_data)
     positions = sorted(map(int, profile_matrix_dict.keys())) # the keys are positions, so we get their ordered int values
 
     # for each position, find the nucleotdie with the max number of counts and use that as the seq nt in that position
     return ''.join([max(profile_matrix_dict[i], key=profile_matrix_dict[i].get) for i in positions])
+
 
 def solve_problem(sequence_data):
     '''
