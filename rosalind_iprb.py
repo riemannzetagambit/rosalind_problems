@@ -11,7 +11,6 @@ def _get_dominant_allele_probability(k, m, n):
     Assume k, m, n are all positive semidefinite
     '''
     total_pop = k + m + n
-    print(f'total population: {total_pop}')
     prob_two_dominant = (k/total_pop)*((k-1)/(total_pop-1))
     # can choose heterozygous individual first or second, then homozygous, so just multiply by factor of two 
     # (and sim. later)
@@ -20,9 +19,6 @@ def _get_dominant_allele_probability(k, m, n):
     prob_two_hetero = (m/total_pop)*((m-1)/(total_pop-1))
     prob_one_hetero_one_recessive = 2*(m/total_pop)*(n/(total_pop-1))
     prob_two_recessive = (n/total_pop)*((n-1)/(total_pop-1))
-    print(f'prob_two_dominant: {prob_two_dominant}\nprob_one_dominant_one_hetero: {prob_one_dominant_one_hetero}\n'
-          f'prob_one_dominant_one_recessive: {prob_one_dominant_one_recessive}\nprob_two_hetero: {prob_two_hetero}\n'
-          f'prob_one_hetero_one_recessive: {prob_one_hetero_one_recessive}\nprob_two_recessive: {prob_two_recessive}')
 
     # draw Mendelian squares for this logic
     # 2 homoz. dominant individuals always produce dominant offspring, so multiply by factor 1 for this combo
@@ -41,10 +37,8 @@ def solve_problem(sequence_data):
     Assumes only one line in file
     '''
     k, m, n = map(int, sequence_data[0].split())
-    print(k, m, n)
     prob_dominant_allele = _get_dominant_allele_probability(k, m, n)
 
-    print(f'{prob_dominant_allele}')
     return prob_dominant_allele
 
 
