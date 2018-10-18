@@ -6,7 +6,7 @@ from rosalind_utils import get_reverse_complement, get_rosalind_data, process_fa
 
 def _get_read_overlap(seq1, seq2, min_overlap=0.5):
     '''
-    Given two sequences that overlap by at least half the shorter one's length, 
+    Given two sequences that overlap by at least half the shorter one's length,
     return the sequence gotten by merging them on the overlap
 
     Example:
@@ -14,7 +14,7 @@ def _get_read_overlap(seq1, seq2, min_overlap=0.5):
         seq2 = 'GTACG'
         returns 'GTACGG'
     '''
-    short_seq, long_seq = sorted([seq1, seq2], key=lambda x: len(x)) 
+    short_seq, long_seq = sorted([seq1, seq2], key=lambda x: len(x))
     short_len = len(short_seq)
     # e.g. if getting half the length of the shortest read, round up if it is odd in length
     min_overlap_len = int(ceil(min_overlap*short_len)) # have to cast to int, py3 ceil returns float. oddly
@@ -59,6 +59,8 @@ def solve_problem(sequence_data):
     reads_assembled = [reads[0]]
 
     # assemble the chromosome by finding the (unique, thank god for this problem we don't have to deal with bubbles)
+    # NOTE(dstone): EDIT. we can assume unique overlap-- we just have to find the ovlerap that gives the shortest
+    # resulting sequence
     # pair that it has overlap. Start with the first read as the seed, find the other read it overlaps with, and set the
     # chromosome to those combined reads. Then repeat the process with the newly updated chromosome. Continue to add on
     # unique bits to the chromosome until you have exhausted all reads
@@ -67,16 +69,18 @@ def solve_problem(sequence_data):
     while len(reads_assembled) != len(reads):
         # we have not used all the reads in our assembly, so keep assembling, running over all the reads for matches to
         # the current chromosome update each time
-        for read in reads:
-            if read in reads_assembled:
-                continue
-            # this is the heavy lifting done to get overlap with this read (if any)
-            overlap = _get_read_overlap(chromosome, read)
-            if overlap is not None:
-                # we have a new extension to the chromosome, so update it
-                chromosome = overlap
-                # make sure we don't use this read again
-                reads_assembled.append(read)
+
+        # TODO(dstone): actually, no-- going through the reads like this gives preference to order read in from file,
+        # when in fact we should assemble greedily and find the shortest resulting sequence overall from all reads for a
+        # given chromosome composition
+        shortest_overlap_read = min([r for r in reads if r not in reads_assembled],
+                                    key=lambda read: len(_get_read_overlap(chromosome, read)))
+        # assume we can always find this
+        # we have a new extension to the chromosome, so update it
+        chromosome = _get_read_overlap(chromosome, shortest_overlap_read)
+        # make sure we don't use this read again
+        reads_assembled.append(shortest_overlap_read)
+
 
     test_chromosome_solution = 'ATTAGACCTGCCGGAATAC'
     print(chromosome)
