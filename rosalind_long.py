@@ -15,29 +15,26 @@ def _get_read_overlap(seq1, seq2, min_overlap=0.5):
         returns 'GTACGG'
     '''
     short_seq, long_seq = sorted([seq1, seq2], key=lambda x: len(x))
-    short_len = len(short_seq)
+    short_len, long_len = len(short_seq), len(long_seq)
     # e.g. if getting half the length of the shortest read, round up if it is odd in length
     min_overlap_len = int(ceil(min_overlap*short_len)) # have to cast to int, py3 ceil returns float. oddly
 
     # this range runs through the short sequence from longest to shortest length
     # start with longest match possible, which obeys principle of parsimony
-    for i in range(short_len - min_overlap_len, short_len + 1, 1):
+    # TODO(dstone): rework this so that it runs sequentially from i=0 to something, rework conditional below
+    #for i in range(short_len - min_overlap_len, short_len + 1, 1):
+    for i in range(0, short_len - min_overlap_len):
         # check if the end of the short sequence aligns with the beginning of the long sequence
         # i.e. overlap reads as (short -> long)
         if short_seq[i:] == long_seq[:short_len-i]:
             # attach long_seq to the end of short_seq but remove overlap
+            # currently this is the shortest overlap since we've gone first
             return short_seq + long_seq[short_len-i:]
-    # now instead go through long sequence start with checking last len(short_seq) to coincide with short_seq and
-    # iteratively check shorter sequences
-    # again be as greedy as possible and look for as much overlap as possible
-    for i in range(0, min_overlap_len + 1, 1):
-        # do the opposite: check if the end of the long sequence aligns with the beginning of the short sequence
-        # i.e. overlap reads as (long -> short)
-        # if len(short_seq) = N, check last N nts of long_seq to coincide with all of short_seq, then N-1 nts with first
-        # N-1 nts of short_seq, etc.
-        if long_seq[short_len-min_overlap_len+i:] == short_seq[:min_overlap-i+1]:
-            # attach short_seq to the end of long_seq but remove overlap
-            return long_seq + short_seq[min_overlap-i+1:]
+
+        elif long_seq[(long_len-short_len)+i:] == short_seq[:short_len-i]:
+            return long_seq + short_seq[short_len-i:]
+        
+    # return none if there is no match
     return None
 
 
@@ -54,13 +51,14 @@ def solve_problem(sequence_data):
     # use the first read as the seed for the chromosome and add on from there
     # in principle you could start with any read as a seed but randomizing this process could lead to variability in
     # performance and consistency
-    chromosome = reads[0]
+    chromosome = list(reads)[0]
     # keep track of what reads we've already put into the chromosome
-    reads_assembled = [reads[0]]
+    reads_assembled = [list(reads)[0]]
+
+    # NOTE(dstone): the only assumptions we are allowed to make: "there exists a unique way to reconstruct the entire
+    # chromosome from these reads by gluing together pairs of reads that overlap by more than half their length."
 
     # assemble the chromosome by finding the (unique, thank god for this problem we don't have to deal with bubbles)
-    # NOTE(dstone): EDIT. we can assume unique overlap-- we just have to find the ovlerap that gives the shortest
-    # resulting sequence
     # pair that it has overlap. Start with the first read as the seed, find the other read it overlaps with, and set the
     # chromosome to those combined reads. Then repeat the process with the newly updated chromosome. Continue to add on
     # unique bits to the chromosome until you have exhausted all reads
@@ -70,21 +68,16 @@ def solve_problem(sequence_data):
         # we have not used all the reads in our assembly, so keep assembling, running over all the reads for matches to
         # the current chromosome update each time
 
-        # TODO(dstone): actually, no-- going through the reads like this gives preference to order read in from file,
-        # when in fact we should assemble greedily and find the shortest resulting sequence overall from all reads for a
-        # given chromosome composition
-        shortest_overlap_read = min([r for r in reads if r not in reads_assembled],
-                                    key=lambda read: len(_get_read_overlap(chromosome, read)))
-        # assume we can always find this
-        # we have a new extension to the chromosome, so update it
+        overlaps_by_read = {r: _get_read_overlap(chromosome, r) for r in reads if r not in reads_assembled}
+        # get rid of reads with no overlap
+        overlaps_by_read = {read: overlap for read, overlap in overlaps_by_read.items() if overlap is not None}
+        shortest_overlap_read = min(overlaps_by_read, key=lambda x: len(overlaps_by_read[x]))
+        # set the chromosome to the shortest overlap
         chromosome = _get_read_overlap(chromosome, shortest_overlap_read)
-        # make sure we don't use this read again
         reads_assembled.append(shortest_overlap_read)
 
 
-    test_chromosome_solution = 'ATTAGACCTGCCGGAATAC'
     print(chromosome)
-    assert chromosome == test_chromosome_solution
     return chromosome
 
 
