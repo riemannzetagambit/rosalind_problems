@@ -132,3 +132,17 @@ def random_genetic_sequence(length=150, alphabet=DNA_ALPHABET):
 
 def get_reverse_complement(seq):
     return ''.join([RC_DICT[x] for x in seq[::-1]])
+
+
+# have used in rosalind_hamm and rosalind_corr problems at the least, so putting here
+def get_hamming_distance(seq1, seq2):
+    '''
+    Given two sequences of equal length, return the Hamming distance, i.e. the number of differences between the two
+    sequences (computed position by position)
+
+    Raises if sequences are not of equal length
+    '''
+    if len(seq1) != len(seq2):
+        raise ValueError('Sequences must of equal length. '
+                         'Instead got\n\tlen(seq1): {}\n\tlen(seq2): {}'.format(len(seq1), len(seq2)))
+    return sum(1 for i in range(len(seq1)) if seq1[i] != seq2[i])
