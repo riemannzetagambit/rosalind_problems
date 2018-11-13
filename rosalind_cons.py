@@ -1,7 +1,7 @@
 from collections import Counter
 import sys
 
-from rosalind_utils import DNA_ALPHABET, get_rosalind_data, process_fasta_file
+from .rosalind_utils import DNA_ALPHABET, get_rosalind_data, process_fasta_file
 
 
 def _get_consensus_profile_matrix(sequence_data):

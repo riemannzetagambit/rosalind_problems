@@ -1,6 +1,6 @@
 import sys
 
-from rosalind_utils import get_rosalind_data, RC_DICT
+from .rosalind_utils import get_rosalind_data, RC_DICT
 
 def solve_problem(sequence_data):
     dna_seq = sequence_data[0]

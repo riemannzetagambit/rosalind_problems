@@ -1,6 +1,6 @@
 import sys
 
-from rosalind_utils import get_rosalind_data, RNA_CODON_DICT
+from .rosalind_utils import get_rosalind_data, RNA_CODON_DICT
 
 
 def solve_problem(sequence_data):

@@ -2,7 +2,7 @@ from collections import Counter
 from itertools import product
 import sys
 
-from rosalind_utils import (get_hamming_distance, get_reverse_complement,
+from .rosalind_utils import (get_hamming_distance, get_reverse_complement,
                             get_rosalind_data, process_fasta_file)
 
 
@@ -59,7 +59,10 @@ def solve_problem(sequence_data):
             raise ValueError('No paired error read found for correct read:\n\t{}'.format(cr))
 
     print('\n'.join(['{}->{}'.format(er, cr) for (er, cr) in corrected_reads]))
-    return corrected_reads
+    # from now on I want to return the string solution that Rosalind expects, rather than my custom data structure used
+    # along the way. Instead join the structure into the string format that Rosalind would agree with-- makes unit
+    # testing easier
+    return '\n'.join(['{}->{}'.format(er, cr) for (er, cr) in corrected_reads])
 
 
 if __name__ == '__main__':

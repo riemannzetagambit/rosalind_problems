@@ -1,7 +1,7 @@
 from collections import Counter
 import sys
 
-from rosalind_utils import get_rosalind_data, process_fasta_file, RC_DICT
+from .rosalind_utils import get_rosalind_data, process_fasta_file, RC_DICT
 
 
 def _get_gc_content(dna_seq):

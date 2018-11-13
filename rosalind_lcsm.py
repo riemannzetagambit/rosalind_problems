@@ -1,6 +1,6 @@
 import sys
 
-from rosalind_utils import get_rosalind_data, process_fasta_file
+from .rosalind_utils import get_rosalind_data, process_fasta_file
 
 def _get_kmers_from_sequence(seq, k):
     '''

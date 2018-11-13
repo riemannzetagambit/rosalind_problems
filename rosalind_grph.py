@@ -1,7 +1,7 @@
 from itertools import combinations
 import sys
 
-from rosalind_utils import get_rosalind_data, process_fasta_file
+from .rosalind_utils import get_rosalind_data, process_fasta_file
 
 
 def _has_k_overlap(string1, string2, k):

@@ -1,6 +1,6 @@
 import sys
 
-from rosalind_utils import get_hamming_distance, get_rosalind_data
+from .rosalind_utils import get_hamming_distance, get_rosalind_data
 
 def solve_problem(sequence_data):
     '''
