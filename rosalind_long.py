@@ -21,8 +21,6 @@ def _get_read_overlap(seq1, seq2, min_overlap=0.5):
 
     # this range runs through the short sequence from longest to shortest length
     # start with longest match possible, which obeys principle of parsimony
-    # TODO(dstone): rework this so that it runs sequentially from i=0 to something, rework conditional below
-    #for i in range(short_len - min_overlap_len, short_len + 1, 1):
     for i in range(0, short_len - min_overlap_len):
         # check if the end of the short sequence aligns with the beginning of the long sequence
         # i.e. overlap reads as (short -> long)
