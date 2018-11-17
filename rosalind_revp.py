@@ -1,6 +1,6 @@
 import sys
 
-from .rosalind_utils import get_reverse_complement, get_rosalind_data, process_fasta_file
+from rosalind_utils import get_reverse_complement, get_rosalind_data, process_fasta_file
 
 
 def solve_problem(sequence_data):

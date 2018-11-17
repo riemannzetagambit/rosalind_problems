@@ -7,7 +7,7 @@ sys.path.insert(0, '..')
 from rosalind_utils import get_rosalind_data
 from rosalind_corr import solve_problem as corr_solve
 from rosalind_long import solve_problem as long_solve
-#from ..rosalind_prob import solve_problem as prob_solve
+#from .rosalind_prob import solve_problem as prob_solve
 
 file_path = os.path.dirname(os.path.abspath(__file__))
 

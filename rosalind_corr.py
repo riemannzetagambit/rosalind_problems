@@ -2,7 +2,7 @@ from collections import Counter
 from itertools import product
 import sys
 
-from .rosalind_utils import (get_hamming_distance, get_reverse_complement,
+from rosalind_utils import (get_hamming_distance, get_reverse_complement,
                             get_rosalind_data, process_fasta_file)
 
 

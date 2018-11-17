@@ -3,7 +3,7 @@ from math import log
 import operator
 import sys
 
-from .rosalind_utils import get_rosalind_data
+from rosalind_utils import get_rosalind_data
 
 
 # this is not a python builtin, so make our own

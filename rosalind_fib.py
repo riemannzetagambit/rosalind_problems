@@ -1,6 +1,6 @@
 import sys
 
-from .rosalind_utils import get_rosalind_data
+from rosalind_utils import get_rosalind_data
 
 # memoize
 fib_dict = {1: 1, 2: 1}
