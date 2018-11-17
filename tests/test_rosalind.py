@@ -2,7 +2,7 @@ import os
 import sys
 
 # remove the need for relative .s and add directory above tests to path
-sys.path.insert(0, '..')
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from rosalind_utils import get_rosalind_data
 from rosalind_corr import solve_problem as corr_solve

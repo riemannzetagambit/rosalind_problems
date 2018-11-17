@@ -26,16 +26,17 @@ def solve_problem(sequence_data):
 
     log_prob_random_str = []
     for prob in probs:
+        prob_dict = {}
         # the given probability is the GC content, so prob(G) = prob(c) = prob/2
-        prob_dict['C'], prob_dict['G'] = prob/2
+        prob_dict['G'], prob_dict['C'] = prob/2, prob/2
         # by conservation of probability
-        prob_dict['A'], prob_dict['C'] = (1 - prob)/2
+        prob_dict['A'], prob_dict['T'] = (1 - prob)/2, (1 - prob)/2
         # multiply together the probability of each individual nt
         prob_read = prod([prob_dict[x] for x in read])
-        log_prob_random_str.append(log(prob_read, base=10))
+        log_prob_random_str.append(log(prob_read, 10))
 
-    print(' '.join(log_prob_random_str))
-    return ' '.join(log_prob_random_str)
+    print(' '.join(map(str, log_prob_random_str)))
+    return ' '.join(map(str, log_prob_random_str))
 
 
 if __name__ == '__main__':
