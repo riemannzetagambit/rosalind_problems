@@ -1,15 +1,8 @@
-from functools import reduce
 from math import log
-import operator
 import sys
 
 from rosalind_utils import get_rosalind_data
 
-
-# this is not a python builtin, so make our own
-# see https://stackoverflow.com/questions/595374/whats-the-function-like-sum-but-for-multiplication-product
-def prod(iterable):
-    return reduce(operator.mul, iterable, 1)
 
 def solve_problem(sequence_data):
     '''
@@ -32,8 +25,10 @@ def solve_problem(sequence_data):
         # by conservation of probability
         prob_dict['A'], prob_dict['T'] = (1 - prob)/2, (1 - prob)/2
         # multiply together the probability of each individual nt
-        prob_read = prod([prob_dict[x] for x in read])
-        log_prob_random_str.append(log(prob_read, 10))
+        # use property of logs, log(AB) = log(A) + log(B),
+        # to turn log of product of probabilities into sum of log of probabilities
+        log_prob_read = sum([log(prob_dict[x], 10) for x in read])
+        log_prob_random_str.append(log_prob_read)
 
     print(' '.join(map(str, log_prob_random_str)))
     return ' '.join(map(str, log_prob_random_str))
