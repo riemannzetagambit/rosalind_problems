@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from rosalind_utils import get_rosalind_data
 from rosalind_corr import solve_problem as corr_solve
 from rosalind_long import solve_problem as long_solve
+from rosalind_orf import solve_problem as orf_solve
 from rosalind_prob import solve_problem as prob_solve
 
 file_path = os.path.dirname(os.path.abspath(__file__))
@@ -38,3 +39,9 @@ def test_rosalind_prob():
     prob_solution = prob_solve(test_data)
     for prob_sol, test_sol in zip(prob_solution.split(), solution.split()):
         assert is_close(float(prob_sol), float(test_sol))
+
+def test_rosalind_orf():
+    solution = 'MLLGSFRLIPKETLIQVAGSSPCNLS\nM\nMGMTPRLGLESLLE\nMTPRLGLESLLE'
+    test_path = os.path.join(file_path, './rosalind_orf_test.txt')
+    test_data = get_rosalind_data(test_path)
+    assert orf_solve(test_data) == solution
