@@ -1,4 +1,4 @@
-from itertools import dropwhile, takewhile
+import re
 import sys
 
 from rosalind_utils import get_reverse_complement, get_rosalind_data
@@ -38,28 +38,27 @@ def _get_translated_reads_frames(seq):
     # translate the reading frame with the RNA_CODON_DICT (rcd)
     # yield a generator of a generator
     for rf in rfs:
-        # yield another generator
+        # yield another generator that is the amino acids, proceeding through nucleotides 3 at a time
         yield (rcd[rf[j: j+3]] for j in range(0, len(rf), 3))
 
-def _get_open_reading_frame(trf):
+def _get_open_reading_frames(seq):
     '''
-    :param trf: str
-        DNA string translated into a list or generator of Amino Acids 
+    :param seq: str
+        DNA string to determine (unique) open reading frames from. A single DNA sequence can have multiple ORFs, so we
+        return a unique set of all possible ORFs generated from seq
+
+    :return: set
+        set() of unique ORFs from seq
     '''
-    start_trf = dropwhile(lambda x: x != 'M', trf)
-    # TODO(dstone): need to do some recursion here since we can have multiple ORFs in a translation frame, and need to
-    # check each starting codon for another ORF
-    orf = ''.join(takewhile(lambda x: x.lower() != 'stop', start_trf))
-
-    if len(orf) == 0:
-        return None
-    else:
-        return orf
-
     # TODO: just use regex instead: scratch code from ipython session that is simpler than the dropwhile and takewhile
     # hoops I was jumping through. much simpler
-    aas = ['M', 'S', 'E', 'M', 'L', 'L', 'C', 'Stop', 'E', 'M', 'C', 'Stop']
-    return [m.group(1).replace('Stop', '') for m in re.finditer('(?=(M.*?Stop))', ''.join(aas))]
+    trfs = _get_translated_reads_frames(seq)
+    orfs = []
+    for trf in trfs:
+        orfs.extend([m.group(1).replace('Stop', '') for m in re.finditer('(?=(M.*?Stop))', ''.join(trf))])
+    # casting to set() gives only unique values
+    return set(orfs)
+    
 
 def solve_problem(sequence_data):
     '''
@@ -71,11 +70,7 @@ def solve_problem(sequence_data):
     # first value is the read ID, which we do not need
     _, read = sequence_data[0], sequence_data[1]
 
-    orfs = []
-    for trf in _get_translated_reads_frames(read):
-        orf = _get_open_reading_frame(trf)
-        if orf is not None:
-            orfs.append(orf)
+    orfs = _get_open_reading_frames(read)
 
     print('\n'.join(orfs))
     return '\n'.join(orfs)
