@@ -11,7 +11,7 @@ def solve_problem(sequence_data):
     >read_id_1
     [arbitrary number of lines of ATCG]
     '''
-    seq = process_fasta_file(sequence_data).values()[0]
+    seq = list(process_fasta_file(sequence_data).values())[0]
     seq_len = len(seq)
 
     # problem asks us to restrict to between 4 and 12

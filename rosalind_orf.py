@@ -1,7 +1,7 @@
 import re
 import sys
 
-from rosalind_utils import get_reverse_complement, get_rosalind_data
+from rosalind_utils import get_reverse_complement, get_rosalind_data, process_fasta_file
 from rosalind_utils import RNA_CODON_DICT as rcd
 
 def _get_reading_frames(seq):
@@ -67,8 +67,8 @@ def solve_problem(sequence_data):
     [arbitrary number of lines of ATCG]
 
     '''
-    # first value is the read ID, which we do not need
-    _, read = sequence_data[0], sequence_data[1]
+    # we expect a single read, which is the first value in the process_fasta_file returned dict
+    read = list(process_fasta_file(sequence_data).values())[0]
 
     orfs = _get_open_reading_frames(read)
 
