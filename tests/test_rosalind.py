@@ -37,7 +37,7 @@ def test_rosalind_mprt():
                   \nP20840_SAG1_YEAST\n79 109 135 248 306 348 364 402 485 501 614'''
     test_path = Path('{}/../rosalind_mprt_test.txt'.format(__file__)).resolve()
     test_data = get_rosalind_data(test_path)
-    assert mprt_solve(test_data) == solution
+    assert sorted(mprt_solve(test_data).split()) == sorted(solution.split())
 
 def test_rosalind_prob():
     solution = '-5.737 -5.217 -5.263 -5.360 -5.958 -6.628 -7.009'
@@ -49,7 +49,7 @@ def test_rosalind_prob():
         assert is_close(float(prob_sol), float(test_sol))
 
 def test_rosalind_orf():
-    solution = 'MLLGSFRLIPKETLIQVAGSSATTAGACCTGCCGGAATACPCNLS\nM\nMGMTPRLGLESLLE\nMTPRLGLESLLE'
+    solution = 'MLLGSFRLIPKETLIQVAGSSPCNLS\nM\nMGMTPRLGLESLLE\nMTPRLGLESLLE'
     test_path = Path('{}/../rosalind_orf_test.txt'.format(__file__)).resolve()
     test_data = get_rosalind_data(test_path)
     # account for rearranging
