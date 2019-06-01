@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from rosalind_utils import get_rosalind_data
 from rosalind_corr import solve_problem as corr_solve
 from rosalind_long import solve_problem as long_solve
+from rosalind_mprt import solve_problem as mprt_solve
 from rosalind_orf import solve_problem as orf_solve
 from rosalind_prob import solve_problem as prob_solve
 
@@ -31,6 +32,13 @@ def test_rosalind_long():
     test_data = get_rosalind_data(test_path)
     assert long_solve(test_data) == solution
 
+def test_rosalind_mprt():
+    solution = '''B5ZC00\n85 118 142 306 395\nP07204_TRBM_HUMAN\n47 115 116 382 409
+                  \nP20840_SAG1_YEAST\n79 109 135 248 306 348 364 402 485 501 614'''
+    test_path = Path('{}/../rosalind_mprt_test.txt'.format(__file__)).resolve()
+    test_data = get_rosalind_data(test_path)
+    assert mprt_solve(test_data) == solution
+
 def test_rosalind_prob():
     solution = '-5.737 -5.217 -5.263 -5.360 -5.958 -6.628 -7.009'
     test_path = Path('{}/../rosalind_prob_test.txt'.format(__file__)).resolve()
@@ -41,7 +49,7 @@ def test_rosalind_prob():
         assert is_close(float(prob_sol), float(test_sol))
 
 def test_rosalind_orf():
-    solution = 'MLLGSFRLIPKETLIQVAGSSPCNLS\nM\nMGMTPRLGLESLLE\nMTPRLGLESLLE'
+    solution = 'MLLGSFRLIPKETLIQVAGSSATTAGACCTGCCGGAATACPCNLS\nM\nMGMTPRLGLESLLE\nMTPRLGLESLLE'
     test_path = Path('{}/../rosalind_orf_test.txt'.format(__file__)).resolve()
     test_data = get_rosalind_data(test_path)
     # account for rearranging
