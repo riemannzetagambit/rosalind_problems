@@ -1,4 +1,7 @@
+from collections import OrderedDict
 from random import choice
+import re
+from typing import Generator, List
 
 DNA_ALPHABET = 'ACGT'
 RNA_ALPHABET = 'ACGU'
@@ -99,7 +102,7 @@ def process_fasta_file(lines):
     :return: dict
         Dictionary with keys the read ID (assumed to be unique), values the associated reads (i.e. DNA sequences)
     '''
-    read_dict = {}
+    read_dict = OrderedDict()
     read_id = None
     lines = iter(lines)
     for line in lines:
@@ -146,3 +149,84 @@ def get_hamming_distance(seq1, seq2):
         raise ValueError('Sequences must of equal length. '
                          'Instead got\n\tlen(seq1): {}\n\tlen(seq2): {}'.format(len(seq1), len(seq2)))
     return sum(1 for i in range(len(seq1)) if seq1[i] != seq2[i])
+
+
+def get_reading_frames(seq: str) -> List[str]:
+    '''
+    For a given sequence, return the 6 possible reading frames associated to it and its reverse complement,
+    without regard for start/stop codons.
+
+    These reading frames are translated into AA, so the return result is an array of 6 arrays of AA translations for
+    each possible translation
+    '''
+    rc_seq = get_reverse_complement(seq)
+    # convert to RNA for translation
+    seq, rc_seq = convert_dna_to_rna(seq), convert_dna_to_rna(rc_seq)
+
+    rfs = []
+    # go through 2x forward and reverse positions
+    for tmp_seq in [seq, rc_seq]:
+        seq_len = len(tmp_seq)
+        # go through 3x places to start for unique codons
+        for i in range(3):
+            # iterate through the sequence from the starting point in steps of 3 until you hit last translatable codon
+            rfs.append(tmp_seq[i: seq_len - (seq_len - i) % 3])
+
+    # return an array with 6 contents, each itself an array with possible codon translation of that reading frame
+    return rfs
+
+
+def get_translated_reads_frames(seq: str) -> Generator[str, None, None]:
+    '''
+    Given an input sequence, return each of the 6 possible reading frames (offset up to 3 x reverse complement),
+    translated into amino acids
+
+    :param seq: str
+        Input dna sequence as a string
+        Example: 'ATCGCAGATCGA'
+
+    :return: generator of string translated reading frames
+        a generator that is the six possible reading frames, translated to amino acids
+    '''
+    rfs = get_reading_frames(seq)
+    # _get_reading_frames already shifted the reading from for us, so we just iterate through each rf the same way
+    # translate the reading frame with the RNA_CODON_DICT (rcd)
+    # yield a generator of a strings that are the translating reading frames
+    for rf in rfs:
+        yield ''.join(RNA_CODON_DICT[rf[j: j+3]] for j in range(0, len(rf), 3))
+
+
+def get_open_reading_frames(seq: str) -> Generator[str, None, None]:
+    '''
+    :param seq: str
+        DNA string to determine (unique) open reading frames from. A single DNA sequence can have multiple ORFs, so we
+        return a unique set of all possible ORFs generated from seq
+
+    :return: generator of string ORFs
+        a generator that is the unique ORFs associated with the sequence
+    '''
+    trfs = get_translated_reads_frames(seq)
+    orfs = []
+    for trf in trfs:
+        orfs.extend([m.group(1).replace('Stop', '') for m in re.finditer('(?=(M.*?Stop))', trf)])
+    # casting to set() gives only unique values
+    for orf in set(orfs):
+        yield orf
+
+
+def convert_dna_to_rna(seq: str) -> str:
+    return seq.replace('T', 'U')
+
+
+def convert_dna_to_aa(seq: str) -> Generator[str, None, None]:
+    '''
+    Convenience wrapper that is another name for get_translated_reads_frames
+    '''
+    return get_translated_reads_frames(seq)
+
+
+def convert_dna_to_protein(seq: str) -> Generator[str, None, None]:
+    '''
+    Convenience wrapper that is another name for get_open_reading_frames
+    '''
+    return get_open_reading_frames(seq)
