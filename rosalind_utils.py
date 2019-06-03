@@ -159,7 +159,7 @@ def get_reading_frames(seq: str, include_reverse_complement: bool = True) -> Gen
     :param seq: str
         Input dna sequence as a string
         Example: 'ATCGCAGATCGA'
-    :param include_reverse_complement=include_reverse_complement: bool
+    :param include_reverse_complement: bool
         Whether or not to return values that include the reverse complement in the solutions.
         For example, in some instances, seq represents a sense strand, and we do not want to look at
         translations/transcriptions of the reverse complement
@@ -200,7 +200,7 @@ def get_translated_reads_frames(seq: str, include_reverse_complement: bool = Tru
     :param seq: str
         Input dna sequence as a string
         Example: 'ATCGCAGATCGA'
-    :param include_reverse_complement=include_reverse_complement: bool
+    :param include_reverse_complement: bool
         Whether or not to return values that include the reverse complement in the solutions.
         For example, in some instances, seq represents a sense strand, and we do not want to look at
         translations/transcriptions of the reverse complement
@@ -216,23 +216,33 @@ def get_translated_reads_frames(seq: str, include_reverse_complement: bool = Tru
         yield ''.join(RNA_CODON_DICT[rf[j: j+3]] for j in range(0, len(rf), 3))
 
 
-def get_open_reading_frames(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
+def get_open_reading_frames(seq: str,
+                            include_reverse_complement: bool = True,
+                            include_overlapping_solutions: bool = True) -> Generator[str, None, None]:
     '''
     :param seq: str
         Input dna sequence as a string
         Example: 'ATCGCAGATCGA'
-    :param include_reverse_complement=include_reverse_complement: bool
+    :param include_reverse_complement: bool
         Whether or not to return values that include the reverse complement in the solutions.
         For example, in some instances, seq represents a sense strand, and we do not want to look at
         translations/transcriptions of the reverse complement
+    :param include_overlapping_solutions: bool
+        Whether to include multiple solutions if an ORF has multiple start points before a stop point
+        Example: If True, if an ORF is MVYIADKQHVASREAYGHMFKVCA, then so is MFKVCA.
+                 If False, only includes the longest match
 
     :return: generator of string ORFs
         a generator that is the unique ORFs associated with the sequence
     '''
+    if include_overlapping_solutions:
+        orf_regex = re.compile('(?=(?P<orf>M.*?Stop))')
+    else:
+        orf_regex = re.compile('(?P<orf>M.*?Stop)')
     trfs = get_translated_reads_frames(seq, include_reverse_complement=include_reverse_complement)
     orfs = []
     for trf in trfs:
-        orfs.extend([m.group(1).replace('Stop', '') for m in re.finditer('(?=(M.*?Stop))', trf)])
+        orfs.extend([m.group('orf').replace('Stop', '') for m in orf_regex.finditer(trf)])
     # casting to set() gives only unique values
     for orf in set(orfs):
         yield orf
@@ -249,8 +259,12 @@ def convert_dna_to_aa(seq: str, include_reverse_complement: bool = True) -> Gene
     return get_translated_reads_frames(seq, include_reverse_complement=include_reverse_complement)
 
 
-def convert_dna_to_protein(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
+def convert_dna_to_protein(seq: str,
+                           include_reverse_complement: bool = True,
+                           include_overlapping_solutions: bool = True) -> Generator[str, None, None]:
     '''
     Convenience wrapper that is another name for get_open_reading_frames
     '''
-    return get_open_reading_frames(seq, include_reverse_complement=include_reverse_complement)
+    return get_open_reading_frames(seq,
+                                   include_reverse_complement=include_reverse_complement,
+                                   include_overlapping_solutions=include_overlapping_solutions)
