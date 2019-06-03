@@ -1,7 +1,7 @@
 from typing import List
 import sys
 
-from rosalind_utils import get_rosalind_data, process_fasta_file, RNA_CODON_DICT
+from rosalind_utils import convert_dna_to_protein, get_rosalind_data, process_fasta_file
 
 def _splice_read(read: str, introns: List[str]) -> str:
     '''
@@ -20,7 +20,7 @@ def _splice_read(read: str, introns: List[str]) -> str:
 
     return read
 
-def solve_problem(sequence_data):
+def solve_problem(sequence_data: list) -> str:
     '''
     Assumptions: input file is of the form
     >read_id_0
@@ -32,7 +32,11 @@ def solve_problem(sequence_data):
     # since process_fasta_file returns an OrderedDict, we are assured that the first value is the read
     read, introns = reads[0], reads[1:]
     spliced_read = _splice_read(read, introns)
-    rna_spliced_read = 
+    # because we use the generator twice below, we need to cast this to a list lest we exhaust it
+    proteins = list(convert_dna_to_protein(spliced_read))
+
+    print('\n'.join(proteins))
+    return '\n'.join(proteins)
 
 
 if __name__ == '__main__':
