@@ -156,6 +156,17 @@ def get_reading_frames(seq: str, include_reverse_complement: bool = True) -> Gen
     For a given sequence, return the 6 possible reading frames associated to it and its reverse complement,
     without regard for start/stop codons.
 
+    :param seq: str
+        Input dna sequence as a string
+        Example: 'ATCGCAGATCGA'
+    :param include_reverse_complement=include_reverse_complement: bool
+        Whether or not to return values that include the reverse complement in the solutions.
+        For example, in some instances, seq represents a sense strand, and we do not want to look at
+        translations/transcriptions of the reverse complement
+
+    :return: generator of string reading frames
+        a generator that is the (up to) six possible reading frames, as DNA
+
     These reading frames are translated into AA, so the return result is an array of 6 arrays of AA translations for
     each possible translation
     '''
@@ -165,7 +176,7 @@ def get_reading_frames(seq: str, include_reverse_complement: bool = True) -> Gen
         # convert to RNA for translation
         seqs = (convert_dna_to_rna(seq), convert_dna_to_rna(rc_seq))
     else:
-        seqs = (convert_dna_to_rna(seq))
+        seqs = (convert_dna_to_rna(seq), )
 
     rfs = []
     # go through 2x forward and reverse positions
@@ -189,9 +200,13 @@ def get_translated_reads_frames(seq: str, include_reverse_complement: bool = Tru
     :param seq: str
         Input dna sequence as a string
         Example: 'ATCGCAGATCGA'
+    :param include_reverse_complement=include_reverse_complement: bool
+        Whether or not to return values that include the reverse complement in the solutions.
+        For example, in some instances, seq represents a sense strand, and we do not want to look at
+        translations/transcriptions of the reverse complement
 
     :return: generator of string translated reading frames
-        a generator that is the six possible reading frames, translated to amino acids
+        a generator that is the (up to) six possible reading frames, translated to amino acids
     '''
     rfs = get_reading_frames(seq, include_reverse_complement=include_reverse_complement)
     # _get_reading_frames already shifted the reading from for us, so we just iterate through each rf the same way
@@ -204,8 +219,12 @@ def get_translated_reads_frames(seq: str, include_reverse_complement: bool = Tru
 def get_open_reading_frames(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
     '''
     :param seq: str
-        DNA string to determine (unique) open reading frames from. A single DNA sequence can have multiple ORFs, so we
-        return a unique set of all possible ORFs generated from seq
+        Input dna sequence as a string
+        Example: 'ATCGCAGATCGA'
+    :param include_reverse_complement=include_reverse_complement: bool
+        Whether or not to return values that include the reverse complement in the solutions.
+        For example, in some instances, seq represents a sense strand, and we do not want to look at
+        translations/transcriptions of the reverse complement
 
     :return: generator of string ORFs
         a generator that is the unique ORFs associated with the sequence
@@ -223,15 +242,15 @@ def convert_dna_to_rna(seq: str) -> str:
     return seq.replace('T', 'U')
 
 
-def convert_dna_to_aa(seq: str) -> Generator[str, None, None]:
+def convert_dna_to_aa(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
     '''
     Convenience wrapper that is another name for get_translated_reads_frames
     '''
-    return get_translated_reads_frames(seq)
+    return get_translated_reads_frames(seq, include_reverse_complement=include_reverse_complement)
 
 
-def convert_dna_to_protein(seq: str) -> Generator[str, None, None]:
+def convert_dna_to_protein(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
     '''
     Convenience wrapper that is another name for get_open_reading_frames
     '''
-    return get_open_reading_frames(seq)
+    return get_open_reading_frames(seq, include_reverse_complement=include_reverse_complement)

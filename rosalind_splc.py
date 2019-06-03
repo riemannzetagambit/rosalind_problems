@@ -33,7 +33,7 @@ def solve_problem(sequence_data: list) -> str:
     read, introns = reads[0], reads[1:]
     spliced_read = _splice_read(read, introns)
     # because we use the generator twice below, we need to cast this to a list lest we exhaust it
-    proteins = list(convert_dna_to_protein(spliced_read))
+    proteins = list(convert_dna_to_protein(spliced_read, include_reverse_complement=False))
 
     print('\n'.join(proteins))
     return '\n'.join(proteins)
