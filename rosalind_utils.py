@@ -3,6 +3,7 @@ from random import choice
 import re
 from typing import Generator, List
 
+AA_ALPHABET = 'ACDEFGHIKLMNPQRSTVWY'
 DNA_ALPHABET = 'ACGT'
 RNA_ALPHABET = 'ACGU'
 
