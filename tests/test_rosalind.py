@@ -10,6 +10,7 @@ from rosalind_long import solve_problem as long_solve
 from rosalind_mprt import solve_problem as mprt_solve
 from rosalind_orf import solve_problem as orf_solve
 from rosalind_prob import solve_problem as prob_solve
+from rosalind_splc import solve_problem as splc_solve
 
 
 def is_close(a, b, rel_tol=1e-4):
@@ -54,3 +55,9 @@ def test_rosalind_orf():
     test_data = get_rosalind_data(test_path)
     # account for rearranging
     assert sorted(orf_solve(test_data).split()) == sorted(solution.split())
+
+def test_rosalind_splc():
+    solution = 'MVYIADKQHVASREAYGHMFKVCA'
+    test_path = Path('{}/../rosalind_splc_test.txt'.format(__file__)).resolve()
+    test_data = get_rosalind_data(test_path)
+    assert splc_solve(test_data) == solution
