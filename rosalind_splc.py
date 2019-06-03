@@ -35,6 +35,7 @@ def solve_problem(sequence_data: list) -> str:
     # because we use the generator twice below, we need to cast this to a list lest we exhaust it
     proteins = list(convert_dna_to_protein(spliced_read,
                                            include_reverse_complement=False,
+                                           include_offsets=False,
                                            include_overlapping_solutions=False))
 
     print('\n'.join(proteins))

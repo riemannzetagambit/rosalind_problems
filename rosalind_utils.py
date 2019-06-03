@@ -151,7 +151,9 @@ def get_hamming_distance(seq1, seq2):
     return sum(1 for i in range(len(seq1)) if seq1[i] != seq2[i])
 
 
-def get_reading_frames(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
+def get_reading_frames(seq: str,
+                       include_reverse_complement: bool = True,
+                       include_offsets: bool = True) -> Generator[str, None, None]:
     '''
     For a given sequence, return the 6 possible reading frames associated to it and its reverse complement,
     without regard for start/stop codons.
@@ -163,6 +165,11 @@ def get_reading_frames(seq: str, include_reverse_complement: bool = True) -> Gen
         Whether or not to return values that include the reverse complement in the solutions.
         For example, in some instances, seq represents a sense strand, and we do not want to look at
         translations/transcriptions of the reverse complement
+    :param include_offsets: bool
+        Whether or not to include the three sets of frames that translation could occur at, one for each starting
+        location within a possible length-3 codon
+        For example, in some instances, seq represents a sense strand where transcription is already occurring-- in
+        this case we do not need to account for the other two possibilities where translation can begin
 
     :return: generator of string reading frames
         a generator that is the (up to) six possible reading frames, as DNA
@@ -177,22 +184,24 @@ def get_reading_frames(seq: str, include_reverse_complement: bool = True) -> Gen
         seqs = (convert_dna_to_rna(seq), convert_dna_to_rna(rc_seq))
     else:
         seqs = (convert_dna_to_rna(seq), )
+    if include_offsets:
+        offsets = 3
+    else:
+        offsets = 1
 
     rfs = []
     # go through 2x forward and reverse positions
     for tmp_seq in seqs:
         seq_len = len(tmp_seq)
         # go through 3x places to start for unique codons
-        for i in range(3):
+        for i in range(offsets):
             # iterate through the sequence from the starting point in steps of 3 until you hit last translatable codon
             yield tmp_seq[i: seq_len - (seq_len - i) % 3]
-            #rfs.append(tmp_seq[i: seq_len - (seq_len - i) % 3])
-
-    # return an array with 6 contents, each itself an array with possible codon translation of that reading frame
-    #return rfs
 
 
-def get_translated_reads_frames(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
+def get_translated_reads_frames(seq: str,
+                                include_reverse_complement: bool = True,
+                                include_offsets: bool = True) -> Generator[str, None, None]:
     '''
     Given an input sequence, return each of the 6 possible reading frames (offset up to 3 x reverse complement),
     translated into amino acids
@@ -204,11 +213,18 @@ def get_translated_reads_frames(seq: str, include_reverse_complement: bool = Tru
         Whether or not to return values that include the reverse complement in the solutions.
         For example, in some instances, seq represents a sense strand, and we do not want to look at
         translations/transcriptions of the reverse complement
+    :param include_offsets: bool
+        Whether or not to include the three sets of frames that translation could occur at, one for each starting
+        location within a possible length-3 codon
+        For example, in some instances, seq represents a sense strand where transcription is already occurring-- in
+        this case we do not need to account for the other two possibilities where translation can begin
 
     :return: generator of string translated reading frames
         a generator that is the (up to) six possible reading frames, translated to amino acids
     '''
-    rfs = get_reading_frames(seq, include_reverse_complement=include_reverse_complement)
+    rfs = get_reading_frames(seq,
+                             include_reverse_complement=include_reverse_complement,
+                             include_offsets=include_offsets)
     # _get_reading_frames already shifted the reading from for us, so we just iterate through each rf the same way
     # translate the reading frame with the RNA_CODON_DICT (rcd)
     # yield a generator of a strings that are the translating reading frames
@@ -218,6 +234,7 @@ def get_translated_reads_frames(seq: str, include_reverse_complement: bool = Tru
 
 def get_open_reading_frames(seq: str,
                             include_reverse_complement: bool = True,
+                            include_offsets: bool = True,
                             include_overlapping_solutions: bool = True) -> Generator[str, None, None]:
     '''
     :param seq: str
@@ -227,6 +244,11 @@ def get_open_reading_frames(seq: str,
         Whether or not to return values that include the reverse complement in the solutions.
         For example, in some instances, seq represents a sense strand, and we do not want to look at
         translations/transcriptions of the reverse complement
+    :param include_offsets: bool
+        Whether or not to include the three sets of frames that translation could occur at, one for each starting
+        location within a possible length-3 codon
+        For example, in some instances, seq represents a sense strand where transcription is already occurring-- in
+        this case we do not need to account for the other two possibilities where translation can begin
     :param include_overlapping_solutions: bool
         Whether to include multiple solutions if an ORF has multiple start points before a stop point
         Example: If True, if an ORF is MVYIADKQHVASREAYGHMFKVCA, then so is MFKVCA.
@@ -239,7 +261,9 @@ def get_open_reading_frames(seq: str,
         orf_regex = re.compile('(?=(?P<orf>M.*?Stop))')
     else:
         orf_regex = re.compile('(?P<orf>M.*?Stop)')
-    trfs = get_translated_reads_frames(seq, include_reverse_complement=include_reverse_complement)
+    trfs = get_translated_reads_frames(seq,
+                                       include_reverse_complement=include_reverse_complement,
+                                       include_offsets=include_offsets)
     orfs = []
     for trf in trfs:
         orfs.extend([m.group('orf').replace('Stop', '') for m in orf_regex.finditer(trf)])
@@ -252,19 +276,25 @@ def convert_dna_to_rna(seq: str) -> str:
     return seq.replace('T', 'U')
 
 
-def convert_dna_to_aa(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
+def convert_dna_to_aa(seq: str, 
+                      include_reverse_complement: bool = True,
+                      include_offsets: bool = True) -> Generator[str, None, None]:
     '''
     Convenience wrapper that is another name for get_translated_reads_frames
     '''
-    return get_translated_reads_frames(seq, include_reverse_complement=include_reverse_complement)
+    return get_translated_reads_frames(seq,
+                                       include_reverse_complement=include_reverse_complement,
+                                       include_offsets=include_offsets)
 
 
 def convert_dna_to_protein(seq: str,
                            include_reverse_complement: bool = True,
+                           include_offsets: bool = True,
                            include_overlapping_solutions: bool = True) -> Generator[str, None, None]:
     '''
     Convenience wrapper that is another name for get_open_reading_frames
     '''
     return get_open_reading_frames(seq,
                                    include_reverse_complement=include_reverse_complement,
+                                   include_offsets=include_offsets,
                                    include_overlapping_solutions=include_overlapping_solutions)
