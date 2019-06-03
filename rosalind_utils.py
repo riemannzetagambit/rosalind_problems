@@ -118,7 +118,7 @@ def process_fasta_file(lines):
                     # we already have a read ID from last read ID assignment and have been constructing read
                     # so just assign GC content of constructed read to last read ID (that read was associated with)
                     read_dict[read_id] = read
-                # if read_id is None, this is the first line, so just assign the read ID, 
+                # if read_id is None, this is the first line, so just assign the read ID,
                 # we'll get GC content in next pass
                 read_id = line.lstrip('>').strip()
                 break
@@ -151,7 +151,7 @@ def get_hamming_distance(seq1, seq2):
     return sum(1 for i in range(len(seq1)) if seq1[i] != seq2[i])
 
 
-def get_reading_frames(seq: str) -> List[str]:
+def get_reading_frames(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
     '''
     For a given sequence, return the 6 possible reading frames associated to it and its reverse complement,
     without regard for start/stop codons.
@@ -159,24 +159,29 @@ def get_reading_frames(seq: str) -> List[str]:
     These reading frames are translated into AA, so the return result is an array of 6 arrays of AA translations for
     each possible translation
     '''
-    rc_seq = get_reverse_complement(seq)
-    # convert to RNA for translation
-    seq, rc_seq = convert_dna_to_rna(seq), convert_dna_to_rna(rc_seq)
+    if include_reverse_complement:
+        # get the reverse complement and include it
+        rc_seq = get_reverse_complement(seq)
+        # convert to RNA for translation
+        seqs = (convert_dna_to_rna(seq), convert_dna_to_rna(rc_seq))
+    else:
+        seqs = (convert_dna_to_rna(seq))
 
     rfs = []
     # go through 2x forward and reverse positions
-    for tmp_seq in [seq, rc_seq]:
+    for tmp_seq in seqs:
         seq_len = len(tmp_seq)
         # go through 3x places to start for unique codons
         for i in range(3):
             # iterate through the sequence from the starting point in steps of 3 until you hit last translatable codon
-            rfs.append(tmp_seq[i: seq_len - (seq_len - i) % 3])
+            yield tmp_seq[i: seq_len - (seq_len - i) % 3]
+            #rfs.append(tmp_seq[i: seq_len - (seq_len - i) % 3])
 
     # return an array with 6 contents, each itself an array with possible codon translation of that reading frame
-    return rfs
+    #return rfs
 
 
-def get_translated_reads_frames(seq: str) -> Generator[str, None, None]:
+def get_translated_reads_frames(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
     '''
     Given an input sequence, return each of the 6 possible reading frames (offset up to 3 x reverse complement),
     translated into amino acids
@@ -188,7 +193,7 @@ def get_translated_reads_frames(seq: str) -> Generator[str, None, None]:
     :return: generator of string translated reading frames
         a generator that is the six possible reading frames, translated to amino acids
     '''
-    rfs = get_reading_frames(seq)
+    rfs = get_reading_frames(seq, include_reverse_complement=include_reverse_complement)
     # _get_reading_frames already shifted the reading from for us, so we just iterate through each rf the same way
     # translate the reading frame with the RNA_CODON_DICT (rcd)
     # yield a generator of a strings that are the translating reading frames
@@ -196,7 +201,7 @@ def get_translated_reads_frames(seq: str) -> Generator[str, None, None]:
         yield ''.join(RNA_CODON_DICT[rf[j: j+3]] for j in range(0, len(rf), 3))
 
 
-def get_open_reading_frames(seq: str) -> Generator[str, None, None]:
+def get_open_reading_frames(seq: str, include_reverse_complement: bool = True) -> Generator[str, None, None]:
     '''
     :param seq: str
         DNA string to determine (unique) open reading frames from. A single DNA sequence can have multiple ORFs, so we
@@ -205,7 +210,7 @@ def get_open_reading_frames(seq: str) -> Generator[str, None, None]:
     :return: generator of string ORFs
         a generator that is the unique ORFs associated with the sequence
     '''
-    trfs = get_translated_reads_frames(seq)
+    trfs = get_translated_reads_frames(seq, include_reverse_complement=include_reverse_complement)
     orfs = []
     for trf in trfs:
         orfs.extend([m.group(1).replace('Stop', '') for m in re.finditer('(?=(M.*?Stop))', trf)])
