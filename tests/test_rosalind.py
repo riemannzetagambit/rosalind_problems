@@ -11,6 +11,7 @@ from rosalind_mprt import solve_problem as mprt_solve
 from rosalind_orf import solve_problem as orf_solve
 from rosalind_prob import solve_problem as prob_solve
 from rosalind_splc import solve_problem as splc_solve
+from rosalind_tran import solve_problem as tran_solve
 
 
 def is_close(a, b, rel_tol=1e-4):
@@ -61,3 +62,9 @@ def test_rosalind_splc():
     test_path = Path('{}/../rosalind_splc_test.txt'.format(__file__)).resolve()
     test_data = get_rosalind_data(test_path)
     assert splc_solve(test_data) == solution
+
+def test_rosalind_splc():
+    solution = '1.21428571429'
+    test_path = Path('{}/../rosalind_tran_test.txt'.format(__file__)).resolve()
+    test_data = get_rosalind_data(test_path)
+    assert is_close(float(tran_solve(test_data)), float(solution))
