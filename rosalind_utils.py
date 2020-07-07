@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from random import choice
 import re
-from typing import Generator, List
+from typing import Generator, List, TextIO
 
 AA_ALPHABET = 'ACDEFGHIKLMNPQRSTVWY'
 DNA_ALPHABET = 'ACGT'
@@ -88,46 +88,43 @@ def get_rosalind_data(filename):
     return [rd.strip() for rd in rosalind_data]
 
 
-def process_fasta_file(lines):
+def process_fasta_file(file_handle: TextIO, read_id_delimiter: str='>') -> dict:
     '''
     Given a file in fasta format, return the read IDs and their associated reads (which can span over multiple lines) as
     a dictionary
-
     This method assumes that the read IDs in the fasta file are unique, that there are read IDs followed immediately but
     an unknown number of lines of sequence data, and no other gaps (i.e. no blank lines). (this is the standard fasta
     format)
-
-    :param lines: list
+    :param file_handle: list
         List of the lines in the file, usually retrieved via, e.g., open('path/to/file') as f: return f.readlines()
-
     :return: dict
         Dictionary with keys the read ID (assumed to be unique), values the associated reads (i.e. DNA sequences)
     '''
     read_dict = OrderedDict()
     read_id = None
-    lines = iter(lines)
-    for line in lines:
+    #lines = iter(lines)
+    for line in file_handle:
         read = ''
         # iterate through lines to find identifier or set of lines corresponding to reads
         while True:
-            if line is None:
-                # at end of file, so assign read GC content to last known read ID
+            # readline() returns '' for final line (dangerous, I shouldn't be using a while loop, yada yada I'll rewrite this later)
+            # so catch that here
+            if line is None or line == '':
                 read_dict[read_id] = read
                 break
-            elif line.startswith('>'):
+            elif line.startswith(read_id_delimiter):
                 if read_id is not None:
                     # we already have a read ID from last read ID assignment and have been constructing read
-                    # so just assign GC content of constructed read to last read ID (that read was associated with)
                     read_dict[read_id] = read
                 # if read_id is None, this is the first line, so just assign the read ID,
-                # we'll get GC content in next pass
-                read_id = line.lstrip('>').strip()
+                read_id = line.lstrip(read_id_delimiter).strip()
                 break
             else:
                 # construct the read by iterating through until we hit None (EOF) or next read ID ('>blahblah')
                 read += line.strip()
-                line = next(lines, None)
-    return read_dict
+                #line = next(lines, None)
+                line = file_handle.readline()
+    return dict(read_dict)
 
 
 def random_genetic_sequence(length=150, alphabet=DNA_ALPHABET):
